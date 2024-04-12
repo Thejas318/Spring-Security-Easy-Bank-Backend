@@ -17,7 +17,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
+import javax.sql.DataSource;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -37,11 +37,10 @@ public class ProjectSecurityConfig {
         http.httpBasic(withDefaults());
         return http.build();
     }
-
+/*
     @Bean
     public InMemoryUserDetailsManager userDetailsService(){
        //Approach 1 where we use withDefaultPasswordEncoder() method
-/*
         UserDetails admin = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("12345")
@@ -53,7 +52,6 @@ public class ProjectSecurityConfig {
                 .authorities("read")
                 .build();
         return new InMemoryUserDetailsManager(admin, user);
-*/
         //Approach 2 where we don't use withDefaultPasswordEncoder() method
 
         UserDetails admin = User.withUsername("admin")
@@ -66,9 +64,18 @@ public class ProjectSecurityConfig {
                 .build();
         return new InMemoryUserDetailsManager(admin, user);
     }
+ */
+
+    @Bean
+    public UserDetailsService userDetailsService(DataSource dataSource){
+        return new JdbcUserDetailsManager(dataSource);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
         return NoOpPasswordEncoder.getInstance();
     }
+
+
+
 }
