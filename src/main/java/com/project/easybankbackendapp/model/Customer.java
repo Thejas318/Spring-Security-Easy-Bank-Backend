@@ -39,4 +39,14 @@ public class Customer {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getPwd() {
+        return pwd;
+    }
+    public void setRole(String role) {
+        this.role = role;
+    }
+    public String getRole() {
+        return role;
+    }
 }
