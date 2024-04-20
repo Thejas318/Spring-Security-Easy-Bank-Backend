@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,8 +15,11 @@ public class UserRegistrationService {
 
     private CustomerRepository customerRepository;
 
-    public UserRegistrationService(CustomerRepository customerRepository) {
+    private PasswordEncoder passwordEncoder;
+
+    public UserRegistrationService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -25,6 +29,9 @@ public class UserRegistrationService {
         ResponseEntity response = null;
 
         try{
+            String encodedPassword = this.passwordEncoder.encode(customer.getPwd());
+            customer.setPwd(encodedPassword);
+//            log.info("Customer entered password after encoding the password: {}", customer.getPwd());
             log.info("User registration has started");
             savedCustomer = customerRepository.save(customer);
             if(savedCustomer.getId() > 0){
@@ -37,7 +44,6 @@ public class UserRegistrationService {
             response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An exception has occured due to: " + ex.getMessage());
         }
-
         return response;
     }
 }
