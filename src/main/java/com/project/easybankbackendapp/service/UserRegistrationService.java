@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+
 @Service
 @Slf4j
 public class UserRegistrationService {
@@ -31,6 +33,7 @@ public class UserRegistrationService {
         try{
             String encodedPassword = this.passwordEncoder.encode(customer.getPwd());
             customer.setPwd(encodedPassword);
+            customer.setCreateDt(String.valueOf(new Date(System.currentTimeMillis())));
 //            log.info("Customer entered password after encoding the password: {}", customer.getPwd());
             log.info("User registration has started");
             savedCustomer = customerRepository.save(customer);
