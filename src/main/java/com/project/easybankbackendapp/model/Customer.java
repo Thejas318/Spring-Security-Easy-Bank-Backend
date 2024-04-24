@@ -87,4 +87,17 @@ public class Customer {
     public void setCreateDt(String createDt) {
         this.createDt = createDt;
     }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", pwd='" + pwd + '\'' +
+                ", mobileNumber='" + mobileNumber + '\'' +
+                ", role='" + role + '\'' +
+                ", createDt='" + createDt + '\'' +
+                '}';
+    }
 }

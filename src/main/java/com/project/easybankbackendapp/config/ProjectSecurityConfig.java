@@ -1,5 +1,6 @@
 package com.project.easybankbackendapp.config;
 
+import com.project.easybankbackendapp.filter.CsrfCookieFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.configurers.ldap.LdapAuthenticationProviderConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +21,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -43,12 +48,22 @@ public class ProjectSecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         log.info("I am the one who is securing the requets now");
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
+
+        http.securityContext((security) -> security.requireExplicitSave(false))
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+            .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests((requests) ->
-                requests.requestMatchers("/myAccount", "/myBalance", "/myCards", "/myLoan", "/user ").authenticated())
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/contact", "/registeruser"))
+                requests.requestMatchers("/myAccount", "/myBalance", "/myCards", "/myLoan", "/user").authenticated())
+
+            .csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact", "/registeruser")
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+
             .authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/contact", "/notices", "/registeruser").permitAll());
+
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();

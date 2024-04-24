@@ -5,18 +5,17 @@ import com.project.easybankbackendapp.repository.CustomerRepository;
 import com.project.easybankbackendapp.service.UserRegistrationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Slf4j
 public class RegistrationController {
 
     private UserRegistrationService userRegistrationService;
@@ -39,10 +38,12 @@ public class RegistrationController {
         return entity;
     }
 
-    @RequestMapping("/user")
+    @GetMapping("/user")
     public Customer getUserDetailsAfterLogin(Authentication authentication) {
+        log.info("Request reached /user API after authentication");
         List<Customer> customers = customerRepository.findByEmail(authentication.getName());
         if (customers.size() > 0) {
+            log.info("The customer information being passed to FE: {}", customers.get(0).toString());
             return customers.get(0);
         } else {
             return null;
