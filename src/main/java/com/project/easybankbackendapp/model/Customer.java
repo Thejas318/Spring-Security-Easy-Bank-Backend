@@ -1,11 +1,14 @@
 package com.project.easybankbackendapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "customer")
@@ -25,6 +28,10 @@ public class Customer {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String pwd;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+    private Set<Authority> authorities;
 
     @Column(name = "mobile_number")
     private String mobileNumber;
@@ -88,6 +95,14 @@ public class Customer {
         this.createDt = createDt;
     }
 
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -95,6 +110,7 @@ public class Customer {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", pwd='" + pwd + '\'' +
+                ", authorities=" + authorities +
                 ", mobileNumber='" + mobileNumber + '\'' +
                 ", role='" + role + '\'' +
                 ", createDt='" + createDt + '\'' +

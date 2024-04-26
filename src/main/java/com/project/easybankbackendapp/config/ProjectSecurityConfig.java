@@ -48,21 +48,30 @@ public class ProjectSecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         log.info("I am the one who is securing the requets now");
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-        requestHandler.setCsrfRequestAttributeName("_csrf");
+//        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+//        requestHandler.setCsrfRequestAttributeName("_csrf");
 
         http.securityContext((security) -> security.requireExplicitSave(false))
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
             .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests((requests) ->
-                requests.requestMatchers("/myAccount", "/myBalance", "/myCards", "/myLoan", "/user").authenticated())
+                requests.requestMatchers("/myAccount").hasRole("USER")
+                        .requestMatchers("/myBalance").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/myLoans").hasRole("USER")
+                        .requestMatchers("/myCards").hasRole("USER")
 
-            .csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact", "/registeruser")
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+//                        .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
+//                        .requestMatchers("/myBalance").hasAnyAuthority("VIEWACCOUNT", "VIEWBALANCE")
+//                        .requestMatchers("/myLoans").hasAuthority("VIEWLOANS")
+//                        .requestMatchers("/myCards").hasAuthority("VIEWCARDS")
 
-            .authorizeHttpRequests((requests) ->
-                requests.requestMatchers("/contact", "/notices", "/registeruser").permitAll());
+                        .requestMatchers(    "/user").authenticated()
+                        .requestMatchers( "/notices", "/registeruser", "/contact").permitAll())
+            .csrf((csrf) -> csrf.disable());
+
+//            .csrf((csrf) -> csrf.ignoringRequestMatchers("/registeruser")
+//                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+//                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());

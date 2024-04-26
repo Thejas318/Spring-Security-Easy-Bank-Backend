@@ -1,5 +1,6 @@
 package com.project.easybankbackendapp.config;
 
+import com.project.easybankbackendapp.model.Authority;
 import com.project.easybankbackendapp.model.Customer;
 import com.project.easybankbackendapp.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -51,11 +53,18 @@ public class EasyBankUserDetails implements UserDetailsService {
         else{
             userName = customer.get(0).getEmail();
             password = customer.get(0).getPwd();
-            authorities = new ArrayList<>();
-            authorities.add( new SimpleGrantedAuthority(customer.get(0).getRole()));
-
-
+//            authorities = new ArrayList<>();
+//            authorities.add( new SimpleGrantedAuthority(customer.get(0).getRole()));
+            log.info("The list of authorities in EasybankUserDetails: {}", getGrantedAuthorites(customer.get(0).getAuthorities()));
         }
-        return new User(userName, password, authorities);
+        return new User(userName, password, getGrantedAuthorites(customer.get(0).getAuthorities()));
+    }
+
+    private List<GrantedAuthority> getGrantedAuthorites(Set<Authority> authorities){
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for(Authority authority: authorities){
+            grantedAuthorities.add( new SimpleGrantedAuthority(authority.getName()));
+        }
+        return grantedAuthorities;
     }
 }

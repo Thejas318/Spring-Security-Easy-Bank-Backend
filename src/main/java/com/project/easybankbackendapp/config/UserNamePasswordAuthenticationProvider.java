@@ -52,7 +52,7 @@ public class UserNamePasswordAuthenticationProvider implements AuthenticationPro
         log.info("Cutomized authentication provider being used by provider manager");
         String userName = authentication.getName();
         String rawPassword = authentication.getCredentials().toString();
-        List<Customer> customer = new ArrayList<>();
+//        List<Customer> customer = new ArrayList<>();
         UserDetails userDetails;
         try{
             userDetails = this.easyBankUserDetails.loadUserByUsername(userName);
@@ -63,9 +63,10 @@ public class UserNamePasswordAuthenticationProvider implements AuthenticationPro
             throw new BadCredentialsException("No user registered with this details");
         }
         if(passwordEncoder.matches(rawPassword, userDetails.getPassword())){
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(userDetails.getAuthorities().toString()));
-            return new UsernamePasswordAuthenticationToken(userName, rawPassword, authorities);
+//            List<GrantedAuthority> authorities = new ArrayList<>();
+//            authorities.add(new SimpleGrantedAuthority(userDetails.getAuthorities().toString()));
+            log.info("The list of authorities in UserNamePassowrdAuthenticationProvider: {}", userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userName, rawPassword, userDetails.getAuthorities());
         }
         else{
             throw new BadCredentialsException("Invalid Credentials!");
