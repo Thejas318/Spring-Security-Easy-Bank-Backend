@@ -1,9 +1,6 @@
 package com.project.easybankbackendapp.config;
 
-import com.project.easybankbackendapp.filter.AuthoritiesLoggingAfterFilter;
-import com.project.easybankbackendapp.filter.AuthoritiesLoggingAtFilter;
-import com.project.easybankbackendapp.filter.CsrfCookieFilter;
-import com.project.easybankbackendapp.filter.RequestValidationBeforeFilter;
+import com.project.easybankbackendapp.filter.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +28,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,8 +50,7 @@ public class ProjectSecurityConfig {
 //        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
 //        requestHandler.setCsrfRequestAttributeName("_csrf");
 
-        http.securityContext((security) -> security.requireExplicitSave(false))
-                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/myAccount").hasRole("USER")
@@ -73,7 +68,9 @@ public class ProjectSecurityConfig {
             .csrf((csrf) -> csrf.disable())
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
                 .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
-                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class);
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGenerationFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTtokenValidatorFilter(), BasicAuthenticationFilter.class);
 
 //            .csrf((csrf) -> csrf.ignoringRequestMatchers("/registeruser")
 //                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
@@ -91,6 +88,7 @@ public class ProjectSecurityConfig {
         configuration.setAllowedMethods(Collections.singletonList("*"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setExposedHeaders(Arrays.asList("AUTHORIZATION"));
         configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
