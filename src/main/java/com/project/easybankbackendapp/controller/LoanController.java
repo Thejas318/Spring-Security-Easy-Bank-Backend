@@ -3,6 +3,7 @@ package com.project.easybankbackendapp.controller;
 import com.project.easybankbackendapp.model.Loans;
 import com.project.easybankbackendapp.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ public class LoanController {
     @Autowired
     private LoanRepository loanRepository;
 
+//    @PostAuthorize("hasRole('USER')")
     @GetMapping("/myLoans")
     public List<Loans> getLoanDetails(@RequestParam int id) {
         List<Loans> loans = loanRepository.findByCustomerIdOrderByStartDtDesc(id);
