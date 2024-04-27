@@ -1,6 +1,9 @@
 package com.project.easybankbackendapp.config;
 
+import com.project.easybankbackendapp.filter.AuthoritiesLoggingAfterFilter;
+import com.project.easybankbackendapp.filter.AuthoritiesLoggingAtFilter;
 import com.project.easybankbackendapp.filter.CsrfCookieFilter;
+import com.project.easybankbackendapp.filter.RequestValidationBeforeFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -67,11 +70,14 @@ public class ProjectSecurityConfig {
 
                         .requestMatchers(    "/user").authenticated()
                         .requestMatchers( "/notices", "/registeruser", "/contact").permitAll())
-            .csrf((csrf) -> csrf.disable());
+            .csrf((csrf) -> csrf.disable())
+                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class);
 
 //            .csrf((csrf) -> csrf.ignoringRequestMatchers("/registeruser")
 //                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-//                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+//                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
